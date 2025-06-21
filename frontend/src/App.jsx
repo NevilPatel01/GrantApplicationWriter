@@ -2,37 +2,16 @@ import { useState } from 'react'
 import './App.css'
 import LiquidGlassDashboard from './pages/LiquidGlassDashboard'
 import GrantApplicationForm from './pages/GrantApplicationForm'
+import { Route, Routes } from 'react-router-dom';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
-
-  const handleStartApplication = () => {
-    setCurrentPage('application-form');
-  };
-
-  const handleBackToDashboard = () => {
-    setCurrentPage('dashboard');
-  };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'application-form':
-        return (
-          <GrantApplicationForm 
-            onBackToDashboard={handleBackToDashboard}
-          />
-        );
-      case 'dashboard':
-      default:
-        return <LiquidGlassDashboard onStartApplication={handleStartApplication} />;
-    }
-  };
-
   return (
-    <div className="app w-full min-h-screen">
-      {renderPage()}
-    </div>
-  )
+    <Routes>
+      <Route path="/" element={<LiquidGlassDashboard />} />
+      <Route path="/application-form" element={<GrantApplicationForm />} />
+    </Routes>
+  );
+
 }
 
 export default App

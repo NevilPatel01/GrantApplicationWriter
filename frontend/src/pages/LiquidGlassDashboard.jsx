@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const LiquidGlassDashboard = ({ onStartApplication }) => {
+const LiquidGlassDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -156,19 +157,20 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
                                 Why stress over grant applications? Let our intelligent platform do the heavy lifting while you focus on what matters most — your brilliant ideas.
                             </p>
 
-                            <button
-                                className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
-                                onClick={(e) => {
-                                    createRipple(e);
-                                    onStartApplication && onStartApplication();
-                                }}
-                            >
-                                <span className="flex items-center space-x-3">
-                                    <span>🚀</span>
-                                    <span>Start Lazy Application</span>
-                                    <span>✨</span>
-                                </span>
-                            </button>
+                            <Link to="/application-form">
+                                <button
+                                    className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
+                                    onClick={(e) => {
+                                        createRipple(e);
+                                    }}
+                                >
+                                    <span className="flex items-center space-x-3">
+                                        <span>🚀</span>
+                                        <span>Start Lazy Application</span>
+                                        <span>✨</span>
+                                    </span>
+                                </button>
+                            </Link>
                         </div>
                     </section>
 
@@ -213,8 +215,8 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
                                         key={filter}
                                         onClick={() => setSelectedFilter(filter.toLowerCase())}
                                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${selectedFilter === filter.toLowerCase()
-                                                ? 'glass-button text-white'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            ? 'glass-button text-white'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         {filter}
