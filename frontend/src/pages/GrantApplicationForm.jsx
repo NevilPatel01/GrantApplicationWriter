@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const GrantApplicationForm = ({ onBackToDashboard }) => {
+const GrantApplicationForm = () => {
+    const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [companyInfo, setCompanyInfo] = useState({
@@ -131,7 +133,6 @@ const GrantApplicationForm = ({ onBackToDashboard }) => {
                     companyInfo: companyInfo
                 })
             });
-            
             const data = await response.json();
             
             if (data.success && (!data.questions || data.questions.length === 0)) {
@@ -224,10 +225,10 @@ const GrantApplicationForm = ({ onBackToDashboard }) => {
         } else if (currentStep === 3 && followUpQuestions.length > 0) {
             submitFollowUpAnswers();
         }
-    };                    const prevStep = () => {
+    }; const prevStep = () => {
         if (currentStep === 1) {
             // On step 1, go back to dashboard
-            onBackToDashboard();
+            navigate('/');
         } else if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
             setCanProceed(currentStep === 2 ? !!selectedTemplate : true);

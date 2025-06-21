@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const LiquidGlassDashboard = ({ onStartApplication }) => {
+const LiquidGlassDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -191,8 +192,8 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
                                         key={filter}
                                         onClick={() => setSelectedFilter(filter.toLowerCase())}
                                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${selectedFilter === filter.toLowerCase()
-                                                ? 'glass-button text-white'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            ? 'glass-button text-white'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         {filter}
