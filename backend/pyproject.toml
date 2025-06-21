@@ -1,0 +1,58 @@
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/.virtualenvs/*",
+    "~/.virtualenvs"
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.coverage.html]
+directory = "tests/coverage_html_report"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-s",
+    "-v",
+    "--cov=backend/",
+    "--cov-report=html",
+    "--tb=line",
+    "--strict-markers",
+]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore:ExceptionGroup"]
+markers = [
+    "cicd_tests: Unit tests to run in the CI/CD pipeline",
+    "triage_deps",
+    "triage_deps_local: test triage dependancy classes parameterized test data",
+    "triage_db_query: test triage db query by patient_id",
+    "triage_schema: triage related schemas",
+    "triage_routes: test triage routes with data from DB",
+    "triage_routes_local: test triage routes with local data and no db connection",
+    "db_conn: test db connection setup",
+    "enum_tests: unit tests for all enum classes",
+    "un_api_indicators",
+    "un_api_indicator_item",
+    "un_api_empirical",
+    "un_api_locations",
+    "un_api_data",
+    "yll_calculation: Calculate YLL from un api json",
+]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+follow_imports = "normal"
+follow_imports_for_stubs = false
+check_untyped_defs = true
+warn_no_return = true
+warn_unreachable = false
+no_silence_site_packages = false
+strict_optional = true
+allow_redefinition = true
+disable_error_code = ["import-untyped", "var-annotated", "misc"]
+
+
