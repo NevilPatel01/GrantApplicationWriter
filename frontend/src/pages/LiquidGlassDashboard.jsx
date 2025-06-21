@@ -286,23 +286,24 @@ const LiquidGlassDashboard = () => {
                             </div>
 
                             {/* Contact */}
-                            <div className="flex flex-col items-start justify-start space-y-4 text-left">
-                            <h4 className="text-white font-semibold font-heading">Get in Touch</h4>
-                            <div className="flex flex-col space-y-3">
-                                <div className="flex items-start space-x-2 text-sm text-gray-400">
-                                <span className="text-lg leading-none">📍</span>
-                                <span className="leading-snug">San Francisco, CA</span>
-                                </div>
-                                <div className="flex items-start space-x-2 text-sm text-gray-400">
-                                <span className="text-lg leading-none">📞</span>
-                                <span className="leading-snug">+1 (555) 123-4567</span>
-                                </div>
-                                <div className="flex items-start space-x-2 text-sm text-gray-400">
-                                <span className="text-lg leading-none">✉️</span>
-                                <span className="leading-snug">hello@lazygrant.com</span>
+                            <div className="flex flex-col items-center justify-center space-y-4">
+                                <h4 className="text-white font-semibold font-heading">Get in Touch</h4>
+                                <div className="flex flex-col space-y-3">
+                                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                        <span className="text-lg leading-none">📍</span>
+                                        <span className="leading-snug">San Francisco, CA</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                        <span className="text-lg leading-none">📞</span>
+                                        <span className="leading-snug">+1 (555) 123-4567</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                        <span className="text-lg leading-none">✉️</span>
+                                        <span className="leading-snug">hello@lazygrant.com</span>
+                                    </div>
                                 </div>
                             </div>
-                            </div>
+
                         </div>
 
                         {/* Bottom Bar */}
