@@ -9,7 +9,6 @@ Grant Application Writer is a web-based tool designed to streamline and simplify
 - ML-Based Score Predictor for answers and applications
 - Pros and Cons Analyzer for polishing responses
 - Section Templates for common grant questions
-- Auto-Save and Version History
 - Download and Export to PDF/DOCX
 
 ---
@@ -22,10 +21,10 @@ Grant Application Writer is a web-based tool designed to streamline and simplify
 - Provide a user-friendly, collaborative platform for startups
 
 ### Tech Stack
-- **Frontend:** React (TypeScript/JavaScript), HTML, CSS (Tailwind/Material UI optional)
-- **Backend:** Node.js/Express or Python Flask/FastAPI
-- **Database:** MongoDB or PostgreSQL
-- **AI/ML:** OpenAI API or Hugging Face
+- **Frontend:** React (TypeScript/JavaScript), Tailwind/Material
+- **Backend:** Flask/FastAPI
+- **Database:** MongoDB
+- **AI/ML:** Google AI API
 - **Version Control:** GitHub
 
 ---
