@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const LiquidGlassDashboard = ({ onStartApplication }) => {
+const LiquidGlassDashboard = () => {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -136,15 +137,15 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
                                                 </p>
 
                                                 <button
-                                                    className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
+                                                    className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-body"
                                                     onClick={(e) => {
                                     createRipple(e);
-                                    if (onStartApplication) onStartApplication();
+                                    navigate('/application-form');
                                 }}
                             >
                                 <span className="flex items-center space-x-3">
                                     <span className="text-xl">🚀</span>
-                                    <p className='font-bold text-2xl sm:text-4xl md:text-2xl lg:text-2xl' style={{fontSize: "1.25rem"}}>Start Grant Application</p>
+                                    <p className='font-bold text-2xl sm:text-4xl md:text-2xl lg:text-2xl font-heading' style={{fontSize: "1.25rem"}}>Start Grant Application</p>
                                     <span className="text-xl">✨</span>
                                 </span>
                             </button>

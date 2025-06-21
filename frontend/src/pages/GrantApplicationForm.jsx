@@ -256,11 +256,14 @@ const GrantApplicationForm = () => {
     };
 
     return (
-        <div className="min-h-screen w-full  relative overflow-hidden">            
+        <div className="min-h-screen w-full relative overflow-hidden">
+            {/* Animated Background */}
+            <div className="liquid-glass-bg fixed inset-0 pointer-events-none"></div>
+            
             {/* Main Content */}
             <div className="liquid-glass-overlay relative z-10 w-full">
                 {/* Header Navigation */}
-                <header className="sticky top-0 z-50 p-6 bg-transparent">
+                <header className="glass-nav sticky top-0 z-50 p-6">
                     <div className="w-full flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
