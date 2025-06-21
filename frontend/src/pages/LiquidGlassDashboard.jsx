@@ -96,42 +96,24 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="liquid-glass-bg fixed inset-0 pointer-events-none"></div>
-
+        <div className="min-h-screen w-full relative overflow-hidden">
             {/* Main Content */}
             <div className="liquid-glass-overlay relative z-10 w-full">
-                {/* Header Navigation */}
-                <header className="glass-nav sticky top-0 z-50 p-6">
+                {/* Header Navigation - removed glass-nav class which might have had a border */}
+                <header className="sticky top-0 z-50 p-5 bg-transparent">
                     <div className="w-full flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
                                 <span className="text-2xl font-bold text-white">L</span>
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-gradient-purple font-display">
+                                <h3 className="text-2xl font-bold text-gradient-purple font-display">
                                     LazyGrant
-                                </h1>
-                                <p className="text-gray-300 text-sm font-medium font-ui">Effortless funding made simple</p>
+                                </h3>
                             </div>
                         </div>
 
                         <div className="flex items-center space-x-6">
-                            <div className="flex items-center space-x-3">
-                                <button className="glass-button px-6 py-2.5 rounded-xl text-white font-medium hover:scale-105 transition-all duration-300 font-ui">
-                                    <span className="flex items-center space-x-2">
-                                        <span>👤</span>
-                                        <span>Profile</span>
-                                    </span>
-                                </button>
-                                <button className="glass-button px-6 py-2.5 rounded-xl text-white font-medium hover:scale-105 transition-all duration-300 font-ui">
-                                    <span className="flex items-center space-x-2">
-                                        <span>⚙️</span>
-                                        <span>Settings</span>
-                                    </span>
-                                </button>
-                            </div>
 
                             {/* User Avatar */}
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
@@ -143,30 +125,26 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
 
                 {/* Dashboard Content */}
                 <main className="w-full px-6 py-8 space-y-8">
-                    {/* Welcome Section */}
-                    <section className="text-center py-16">
-                        <div className="max-w-4xl mx-auto">
-                            <h2 className="text-6xl font-bold text-gradient font-display mb-6">
-                                Welcome to LazyGrant
-                            </h2>
-                            <p className="text-2xl text-gray-300 mb-4 font-light font-accent italic">
-                                "The laziest way to win grants"
-                            </p>
-                            <p className="text-lg text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed font-body">
-                                Why stress over grant applications? Let our intelligent platform do the heavy lifting while you focus on what matters most — your brilliant ideas.
-                            </p>
+                                        <section className="text-center py-16">
+                                            <div className="max-w-4xl mx-auto">
+                                                <h4 className="text-4xl text-gray-300 mb-4 font-light font-accent italic">
+                                                    "The laziest way to win grants"
+                                                </h4>
+                                                <p className="text-lg text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed font-body">
+                                                    Why stress over grant applications? Let our intelligent platform do the heavy lifting while you focus on what matters most — <span className='text-white'>your brilliant ideas.</span>
+                                                </p>
 
-                            <button
-                                className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
-                                onClick={(e) => {
+                                                <button
+                                                    className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
+                                                    onClick={(e) => {
                                     createRipple(e);
                                     onStartApplication && onStartApplication();
                                 }}
                             >
                                 <span className="flex items-center space-x-3">
-                                    <span>🚀</span>
-                                    <span>Start Lazy Application</span>
-                                    <span>✨</span>
+                                    <span className="text-xl">🚀</span>
+                                    <p className='font-bold text-2xl sm:text-4xl md:text-2xl lg:text-2xl' style={{fontSize: "1.25rem"}}>Start Grant Application</p>
+                                    <span className="text-xl">✨</span>
                                 </span>
                             </button>
                         </div>
@@ -183,7 +161,7 @@ const LiquidGlassDashboard = ({ onStartApplication }) => {
                                     <span className="text-3xl">{stat.icon}</span>
                                     <span className="text-2xl font-bold text-white">{stat.value}</span>
                                 </div>
-                                <h3 className="text-gray-300 font-medium mb-1 font-ui">{stat.label}</h3>
+                                <h3 className="text-gray-300 font-medium mb-1">{stat.label}</h3>
                                 <p className="text-sm text-gray-400 font-body">{stat.change}</p>
                             </div>
                         ))}

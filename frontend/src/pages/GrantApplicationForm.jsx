@@ -22,66 +22,56 @@ const GrantApplicationForm = ({ onBackToDashboard }) => {
 
     // Grant Templates
     const grantTemplates = [
-        {
-            id: 1,
-            title: 'Research & Development Grant',
-            description: 'Perfect for innovative research projects and technology development initiatives',
-            icon: '🔬',
-            amount: 'Up to $500,000',
-            duration: '12-36 months',
-            tags: ['Research', 'Innovation', 'Technology'],
-            gradient: 'from-blue-500 to-purple-600'
-        },
-        {
-            id: 2,
-            title: 'Small Business Innovation',
-            description: 'Designed for startups and small businesses looking to scale their operations',
-            icon: '🚀',
-            amount: 'Up to $250,000',
-            duration: '6-24 months',
-            tags: ['Business', 'Startup', 'Growth'],
-            gradient: 'from-green-500 to-teal-600'
-        },
-        {
-            id: 3,
-            title: 'Environmental Impact Grant',
-            description: 'Supporting projects that create positive environmental change',
-            icon: '🌱',
-            amount: 'Up to $1,000,000',
-            duration: '12-48 months',
-            tags: ['Environment', 'Sustainability', 'Impact'],
-            gradient: 'from-emerald-500 to-green-600'
-        },
-        {
-            id: 4,
-            title: 'Education & Training',
-            description: 'Funding educational programs and skill development initiatives',
-            icon: '📚',
-            amount: 'Up to $300,000',
-            duration: '6-18 months',
-            tags: ['Education', 'Training', 'Development'],
-            gradient: 'from-orange-500 to-red-600'
-        },
-        {
-            id: 5,
-            title: 'Healthcare Innovation',
-            description: 'Advancing healthcare technology and medical research projects',
-            icon: '🏥',
-            amount: 'Up to $750,000',
-            duration: '18-36 months',
-            tags: ['Healthcare', 'Medical', 'Innovation'],
-            gradient: 'from-pink-500 to-purple-600'
-        },
-        {
-            id: 6,
-            title: 'Community Development',
-            description: 'Building stronger communities through local development projects',
-            icon: '🏘️',
-            amount: 'Up to $200,000',
-            duration: '6-24 months',
-            tags: ['Community', 'Social', 'Development'],
-            gradient: 'from-indigo-500 to-blue-600'
-        }
+    {
+        "id": 1,
+        "title": "Industrial Research Assistance Program (IRAP)",
+        "description": "Supports Canadian SMEs in research and development of innovative products, processes, or services",
+        "icon": "🔬",
+        "amount": "Up to $10 million",
+        "duration": "Varies by project",
+        "tags": ["R&D", "Innovation", "Technology"],
+        "gradient": "from-blue-500 to-purple-600"
+    },
+    {
+        "id": 2,
+        "title": "Strategic Innovation Fund (SIF)",
+        "description": "Provides large-scale funding for projects that drive innovation and economic growth in Canada’s industrial and technology sectors",
+        "icon": "🚀",
+        "amount": "Up to 50% of project costs",
+        "duration": "Multi-year (typically 2–5 years)",
+        "tags": ["Industrial", "Technology", "Growth"],
+        "gradient": "from-green-500 to-teal-600"
+    },
+    {
+        "id": 3,
+        "title": "CanExport SMEs Program",
+        "description": "Helps Canadian SMEs develop new export opportunities and enter international markets",
+        "icon": "🌎",
+        "amount": "Up to $50,000 per project",
+        "duration": "Project-based (usually up to 1 year)",
+        "tags": ["Export", "International", "Marketing"],
+        "gradient": "from-blue-400 to-cyan-600"
+    },
+    {
+        "id": 4,
+        "title": "FedDev Ontario Funding",
+        "description": "Supports innovation-driven businesses in Southern Ontario with repayable, interest-free contributions",
+        "icon": "🏢",
+        "amount": "$125,000 to $10 million",
+        "duration": "Project-based (typically 1–3 years)",
+        "tags": ["Ontario", "Innovation", "Expansion"],
+        "gradient": "from-purple-500 to-indigo-600"
+    },
+    {
+        "id": 5,
+        "title": "Futurpreneur Canada Startup Program",
+        "description": "Provides financing and mentorship to young entrepreneurs (18–39) launching new businesses",
+        "icon": "💡",
+        "amount": "Up to $60,000",
+        "duration": "Up to 5 years (loan term)",
+        "tags": ["Youth", "Mentorship", "Startup"],
+        "gradient": "from-pink-500 to-red-600"
+    }
     ];
 
     const createRipple = (event) => {
@@ -265,36 +255,20 @@ const GrantApplicationForm = ({ onBackToDashboard }) => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="liquid-glass-bg fixed inset-0 pointer-events-none"></div>
-            
+        <div className="min-h-screen w-full  relative overflow-hidden">            
             {/* Main Content */}
             <div className="liquid-glass-overlay relative z-10 w-full">
                 {/* Header Navigation */}
-                <header className="glass-nav sticky top-0 z-50 p-6">
+                <header className="sticky top-0 z-50 p-6 bg-transparent">
                     <div className="w-full flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                            {/* Only show dashboard button on steps 2 and 3 */}
-                            {currentStep > 1 && (
-                                <button 
-                                    onClick={onBackToDashboard}
-                                    className="glass-button px-4 py-2 rounded-xl text-white font-medium hover:scale-105 transition-all duration-300 font-body"
-                                >
-                                    <span className="flex items-center space-x-2">
-                                        <span>←</span>
-                                        <span>Dashboard</span>
-                                    </span>
-                                </button>
-                            )}
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
-                                <span className="text-2xl font-bold text-white font-display">L</span>
+                                <span className="text-2xl font-bold text-white">L</span>
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-gradient-purple font-display">
+                                <h3 className="text-2xl font-bold text-gradient-purple font-display">
                                     LazyGrant
-                                </h1>
-                                <p className="text-gray-300 text-sm font-medium font-body">New Application</p>
+                                </h3>
                             </div>
                         </div>
 
