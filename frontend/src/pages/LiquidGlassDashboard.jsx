@@ -41,24 +41,13 @@ const LiquidGlassDashboard = () => {
             id: 3,
             title: 'Education Platform Development',
             status: 'Submitted',
-            progress: 100,
+            progress: 50,
             deadline: '2024-02-28',
             amount: '$50,000',
             category: 'Education',
             summary: 'Building an accessible online learning platform for underserved communities',
             tags: ['Education', 'Accessibility', 'Community']
         },
-        {
-            id: 4,
-            title: 'Blockchain Security Research',
-            status: 'In Review',
-            progress: 100,
-            deadline: '2024-03-10',
-            amount: '$100,000',
-            category: 'Technology',
-            summary: 'Researching advanced cryptographic methods for blockchain security',
-            tags: ['Blockchain', 'Security', 'Cryptography']
-        }
     ];
 
     const filteredProjects = projects.filter(project => {
@@ -104,13 +93,19 @@ const LiquidGlassDashboard = () => {
                 {/* Header Navigation - removed glass-nav class which might have had a border */}
                 <header className="sticky top-0 z-50 p-5 bg-transparent">
                     <div className="w-full flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
+                        <div
+                            className="flex items-center space-x-4 cursor-pointer"
+                            onClick={() => navigate('/')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter') navigate('/'); }}
+                            >
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
                                 <span className="text-2xl font-bold text-white">L</span>
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-gradient-purple font-display">
-                                    LazyGrant
+                                LazyGrant
                                 </h3>
                             </div>
                         </div>
@@ -274,7 +269,7 @@ const LiquidGlassDashboard = () => {
                 {/* Footer */}
                 <footer className="glass-card mt-16 mx-6 mb-6 p-8 rounded-2xl">
                     <div className="max-w-6xl mx-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                             {/* Brand Section */}
                             <div className="space-y-4">
                                 <div className="flex items-center space-x-3">
@@ -288,58 +283,25 @@ const LiquidGlassDashboard = () => {
                                 <p className="text-gray-400 text-sm leading-relaxed font-body">
                                     Making grant applications effortless with AI-powered assistance and intelligent automation.
                                 </p>
-                                <div className="flex space-x-4">
-                                    <button className="text-gray-400 hover:text-white transition-colors duration-300">
-                                        <span className="text-xl">📧</span>
-                                    </button>
-                                    <button className="text-gray-400 hover:text-white transition-colors duration-300">
-                                        <span className="text-xl">🐦</span>
-                                    </button>
-                                    <button className="text-gray-400 hover:text-white transition-colors duration-300">
-                                        <span className="text-xl">💼</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Quick Links */}
-                            <div className="space-y-4">
-                                <h4 className="text-white font-semibold font-heading">Quick Links</h4>
-                                <div className="space-y-2">
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Dashboard</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">New Application</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Templates</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Analytics</a>
-                                </div>
-                            </div>
-
-                            {/* Resources */}
-                            <div className="space-y-4">
-                                <h4 className="text-white font-semibold font-heading">Resources</h4>
-                                <div className="space-y-2">
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Help Center</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Grant Tips</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">Success Stories</a>
-                                    <a href="#" className="block text-gray-400 hover:text-white transition-colors duration-300 text-sm font-body">API Docs</a>
-                                </div>
                             </div>
 
                             {/* Contact */}
-                            <div className="space-y-4">
-                                <h4 className="text-white font-semibold font-heading">Get in Touch</h4>
-                                <div className="space-y-3">
-                                    <div className="flex items-center space-x-3 text-sm text-gray-400">
-                                        <span>📍</span>
-                                        <span>San Francisco, CA</span>
-                                    </div>
-                                    <div className="flex items-center space-x-3 text-sm text-gray-400">
-                                        <span>📞</span>
-                                        <span>+1 (555) 123-4567</span>
-                                    </div>
-                                    <div className="flex items-center space-x-3 text-sm text-gray-400">
-                                        <span>✉️</span>
-                                        <span>hello@lazygrant.com</span>
-                                    </div>
+                            <div className="flex flex-col items-start justify-start space-y-4 text-left">
+                            <h4 className="text-white font-semibold font-heading">Get in Touch</h4>
+                            <div className="flex flex-col space-y-3">
+                                <div className="flex items-start space-x-2 text-sm text-gray-400">
+                                <span className="text-lg leading-none">📍</span>
+                                <span className="leading-snug">San Francisco, CA</span>
                                 </div>
+                                <div className="flex items-start space-x-2 text-sm text-gray-400">
+                                <span className="text-lg leading-none">📞</span>
+                                <span className="leading-snug">+1 (555) 123-4567</span>
+                                </div>
+                                <div className="flex items-start space-x-2 text-sm text-gray-400">
+                                <span className="text-lg leading-none">✉️</span>
+                                <span className="leading-snug">hello@lazygrant.com</span>
+                                </div>
+                            </div>
                             </div>
                         </div>
 

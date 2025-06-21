@@ -265,17 +265,22 @@ const GrantApplicationForm = () => {
                 {/* Header Navigation */}
                 <header className="glass-nav sticky top-0 z-50 p-6">
                     <div className="w-full flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
+                        <div
+                            className="flex items-center space-x-4 cursor-pointer"
+                            onClick={() => navigate('/')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter') navigate('/'); }}
+                            >
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg">
                                 <span className="text-2xl font-bold text-white">L</span>
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-gradient-purple font-display">
-                                    LazyGrant
+                                LazyGrant
                                 </h3>
                             </div>
                         </div>
-
                         {/* Progress Indicator */}
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">

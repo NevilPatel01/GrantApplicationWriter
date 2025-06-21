@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Sample data - replace with actual API calls
+
 const mockProjects = [
     {
         id: 1,
