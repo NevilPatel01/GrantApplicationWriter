@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const LiquidGlassDashboard = () => {
+const LiquidGlassDashboard = ({ onStartApplication }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -139,7 +139,7 @@ const LiquidGlassDashboard = () => {
                                                     className="glass-button ripple-effect px-10 py-5 rounded-2xl text-xl font-semibold text-white transform hover:scale-105 transition-all duration-300 shadow-2xl font-ui"
                                                     onClick={(e) => {
                                     createRipple(e);
-                                    onStartApplication && onStartApplication();
+                                    if (onStartApplication) onStartApplication();
                                 }}
                             >
                                 <span className="flex items-center space-x-3">
