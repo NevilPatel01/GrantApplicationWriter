@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import CompanyStorageService from '../services/CompanyStorageService';
 
 const ApplicationEditor = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const editorRef = useRef(null);
     const [selectedText, setSelectedText] = useState('');
     const [selectionPosition, setSelectionPosition] = useState({ x: 0, y: 0 });
@@ -15,34 +15,62 @@ const ApplicationEditor = () => {
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [editPrompt, setEditPrompt] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [formData, setFormData] = useState(null);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // Simulate AI-generated markdown content based on form data
-    const generateMarkdownContent = (formData) => {
+    // Load form data from AsyncStorage on component mount
+    useEffect(() => {
+        const loadFormData = async () => {
+            try {
+                const data = await CompanyStorageService.getAllFormData();
+                setFormData(data);
+                console.log('Form data loaded from AsyncStorage:', data);
+            } catch (error) {
+                console.error('Error loading form data:', error);
+            } finally {
+                setIsDataLoaded(true);
+            }
+        };
+
+        loadFormData();
+    }, []);
+
+    // Simulate AI-generated markdown content based on form data from AsyncStorage
+    const generateMarkdownContent = useCallback(() => {
         const { selectedTemplate, companyInfo } = formData || {};
         
         return `# Grant Application: ${selectedTemplate?.title || 'Industrial Research Assistance Program (IRAP)'}
 
 ## Executive Summary
 
-**${companyInfo?.companyName || 'TechInnovate Solutions'}** is a forward-thinking ${companyInfo?.industry || 'technology'} company seeking funding through the ${selectedTemplate?.title || 'Industrial Research Assistance Program (IRAP)'} to advance our cutting-edge research and development initiatives.
+**${companyInfo?.companyName || 'TechInnovate Solutions'}** is a forward-thinking technology company seeking funding through the ${selectedTemplate?.title || 'Industrial Research Assistance Program (IRAP)'} to advance our cutting-edge research and development initiatives.
 
-Our company has established itself as a leader in innovative solutions, with a strong track record of delivering transformative products that address critical market needs. Through this grant application, we aim to secure funding to accelerate our development timeline and bring our revolutionary technology to market.
+${companyInfo?.description ? `
+
+### Company Description
+
+${companyInfo.description}
+
+` : ''}
 
 ## Company Overview
 
 ### About Our Organization
 
-Founded in ${companyInfo?.foundedYear || '2018'}, ${companyInfo?.companyName || 'TechInnovate Solutions'} has consistently pushed the boundaries of innovation in the ${companyInfo?.industry || 'technology'} sector. Our team of ${companyInfo?.employeeCount || '25'} dedicated professionals brings together diverse expertise in research, development, and commercialization.
+**${companyInfo?.companyName || 'TechInnovate Solutions'}** has established itself as a leader in innovative solutions. Our dedicated team brings together diverse expertise in research, development, and commercialization.
 
 **Key Metrics:**
-- Company Size: ${companyInfo?.employeeCount || '25'} employees
-- Annual Revenue: ${companyInfo?.revenue || '$2.5M'}
-- Industry Focus: ${companyInfo?.industry || 'Technology'}
-- Location: ${companyInfo?.address || 'Innovation District'}
+- Company Name: ${companyInfo?.companyName || 'TechInnovate Solutions'}
+- Employee Count: ${companyInfo?.employeeCount || 'Not specified'}
+- Grant Amount Requested: ${companyInfo?.annualRevenue || 'To be determined'}
+- Email: ${companyInfo?.email || 'Not provided'}
 
-### Mission Statement
+${companyInfo?.documents && companyInfo.documents.length > 0 ? `
+### Supporting Documents
 
-Our mission is to develop breakthrough technologies that solve real-world challenges while creating sustainable value for our stakeholders and the communities we serve.
+We have submitted ${companyInfo.documents.length} supporting document(s) as part of this application:
+${companyInfo.documents.map((doc, index) => `${index + 1}. ${doc.name} (${doc.type})`).join('\n')}
+` : ''}
 
 ## Project Description
 
@@ -52,7 +80,7 @@ This project represents a significant advancement in our core technology platfor
 
 ### Technical Innovation
 
-Our approach combines cutting-edge research methodologies with practical implementation strategies, ensuring that our developments translate into meaningful commercial applications. The project leverages advanced algorithms, sustainable practices, and user-centric design principles.
+Our approach combines cutting-edge research methodologies with practical implementation strategies, ensuring that our developments translate into meaningful commercial applications.
 
 **Key Innovation Areas:**
 - Advanced computational algorithms
@@ -62,87 +90,65 @@ Our approach combines cutting-edge research methodologies with practical impleme
 
 ### Market Opportunity
 
-The addressable market for our solution is estimated at $500M annually, with projected growth of 15% year-over-year. Our unique positioning and innovative approach provide significant competitive advantages in capturing market share.
+The addressable market for our solution is substantial, with projected growth opportunities. Our unique positioning and innovative approach provide significant competitive advantages.
 
 ## Budget and Timeline
 
 ### Financial Requirements
 
-We are requesting $${selectedTemplate?.fundingRange?.split('-')[1]?.replace(/[^0-9]/g, '') || '150,000'} in funding to support the following activities:
+Our funding request of **${selectedTemplate?.amount || 'To be determined'}** will be allocated strategically across key project components to ensure maximum impact and return on investment.
 
-- **Research & Development**: 60% of budget
-- **Equipment & Infrastructure**: 20% of budget  
-- **Personnel & Training**: 15% of budget
-- **Administrative & Overhead**: 5% of budget
+**Budget Allocation:**
+- Research & Development: 50%
+- Personnel & Talent: 30%
+- Equipment & Infrastructure: 15%
+- Marketing & Commercialization: 5%
 
 ### Project Timeline
 
-**Phase 1: Research & Planning** (Months 1-3)
-- Comprehensive market analysis
-- Technical specification development
-- Team assembly and training
+**Phase 1 (Months 1-6): Foundation**
+- Establish research framework
+- Assemble core team
+- Begin technology development
 
-**Phase 2: Development & Testing** (Months 4-9)
-- Prototype development
-- Iterative testing and refinement
-- User feedback integration
+**Phase 2 (Months 7-18): Development**
+- Core technology implementation
+- Prototype development and testing
+- Market validation studies
 
-**Phase 3: Validation & Launch** (Months 10-12)
-- Final validation testing
-- Launch preparation
-- Market introduction
+**Phase 3 (Months 19-24): Launch**
+- Product refinement and optimization
+- Market launch and commercialization
+- Scale operations
 
 ## Expected Outcomes
 
-### Immediate Impact
-
-Upon completion of this project, we anticipate:
-- 40% improvement in operational efficiency
-- 25% reduction in operational costs
-- Creation of 8-12 new high-skilled jobs
-- 3 new intellectual property applications
-
-### Long-term Benefits
-
-The successful completion of this project will position our company to:
-- Scale operations to serve national markets
-- Attract additional investment for growth
-- Establish strategic partnerships with industry leaders
-- Contribute to sustainable development goals
-
-## Team Qualifications
-
-Our project team brings together industry-leading expertise and proven track records of successful project delivery. Key team members include experienced researchers, skilled developers, and strategic business leaders.
-
-### Leadership Team
-
-**Project Director**: 15+ years experience in technology development and commercialization
-**Technical Lead**: PhD in relevant field with 20+ peer-reviewed publications
-**Business Development**: Proven track record of bringing innovative products to market
-
-## Risk Management
-
-We have identified potential risks and developed comprehensive mitigation strategies:
-
-**Technical Risks**: Addressed through iterative development and expert consultation
-**Market Risks**: Mitigated by extensive market research and customer validation
-**Financial Risks**: Managed through careful budget planning and milestone tracking
+Upon successful completion, this project will deliver:
+- Revolutionary technology platform
+- Significant market penetration
+- Job creation and economic growth
+- Industry leadership position
 
 ## Conclusion
 
-This project represents a unique opportunity to advance both our company's capabilities and contribute meaningfully to industry innovation. With strong team qualifications, clear market opportunity, and comprehensive planning, we are well-positioned to deliver exceptional results.
-
-We look forward to partnering with ${selectedTemplate?.title || 'IRAP'} to bring this transformative project to successful completion and create lasting value for all stakeholders.
+We respectfully request your support for this transformative initiative that will advance innovation, create economic value, and establish new industry standards.
 
 ---
 
-*For additional information or clarification, please contact ${companyInfo?.email || 'contact@techinnovate.com'}*`;
-    };
+*Application prepared by ${companyInfo?.companyName || 'TechInnovate Solutions'} | ${new Date().toLocaleDateString()}*`;
+    }, [formData]);
 
     // Initialize markdown content from form data
     const [markdownContent, setMarkdownContent] = useState(() => {
-        return generateMarkdownContent(location.state?.formData);
+        return isDataLoaded && formData ? generateMarkdownContent() : 'Loading...';
     });
+
+    // Update markdown content when form data is loaded
+    useEffect(() => {
+        if (isDataLoaded && formData) {
+            setMarkdownContent(generateMarkdownContent());
+        }
+    }, [isDataLoaded, formData, generateMarkdownContent]);
 
     // Simulated predictability score
     const predictabilityScore = {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CompanyStorageService from '../services/CompanyStorageService';
 
 const GrantApplicationForm = () => {
     const navigate = useNavigate();
@@ -18,6 +19,106 @@ const GrantApplicationForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [canProceed, setCanProceed] = useState(false);
     const [showValidationDialog, setShowValidationDialog] = useState(false);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+    // Load data from AsyncStorage on component mount
+    useEffect(() => {
+        const loadStoredData = async () => {
+            try {
+                setIsLoading(true);
+                
+                const [
+                    storedCompanyInfo,
+                    storedTemplate,
+                    storedQuestions,
+                    storedAnswers,
+                    storedStep
+                ] = await Promise.all([
+                    CompanyStorageService.getCompanyInfo(),
+                    CompanyStorageService.getSelectedTemplate(),
+                    CompanyStorageService.getFollowUpQuestions(),
+                    CompanyStorageService.getQuestionAnswers(),
+                    CompanyStorageService.getCurrentStep()
+                ]);
+
+                // Restore data if it exists
+                if (storedCompanyInfo) {
+                    setCompanyInfo(storedCompanyInfo);
+                }
+                
+                if (storedTemplate) {
+                    setSelectedTemplate(storedTemplate);
+                }
+                
+                if (storedQuestions && storedQuestions.length > 0) {
+                    setFollowUpQuestions(storedQuestions);
+                }
+                
+                if (storedAnswers && Object.keys(storedAnswers).length > 0) {
+                    setQuestionAnswers(storedAnswers);
+                }
+                
+                if (storedStep && storedStep > 1) {
+                    setCurrentStep(storedStep);
+                }
+
+                console.log('Form data loaded from AsyncStorage successfully');
+            } catch (error) {
+                console.error('Error loading stored data:', error);
+            } finally {
+                setIsLoading(false);
+                setIsDataLoaded(true);
+            }
+        };
+
+        loadStoredData();
+    }, []);
+
+    // Save data to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isDataLoaded) return; // Don't save during initial load
+        
+        const saveData = async () => {
+            try {
+                await Promise.all([
+                    CompanyStorageService.saveCompanyInfo(companyInfo),
+                    CompanyStorageService.saveCurrentStep(currentStep),
+                    CompanyStorageService.saveFormMetadata({ 
+                        lastModified: new Date().toISOString(),
+                        currentStep 
+                    })
+                ]);
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        };
+
+        saveData();
+    }, [companyInfo, currentStep, isDataLoaded]);
+
+    // Save selected template when it changes
+    useEffect(() => {
+        if (!isDataLoaded || !selectedTemplate) return;
+        
+        CompanyStorageService.saveSelectedTemplate(selectedTemplate)
+            .catch(error => console.error('Error saving selected template:', error));
+    }, [selectedTemplate, isDataLoaded]);
+
+    // Save follow-up questions when they change
+    useEffect(() => {
+        if (!isDataLoaded) return;
+        
+        CompanyStorageService.saveFollowUpQuestions(followUpQuestions)
+            .catch(error => console.error('Error saving follow-up questions:', error));
+    }, [followUpQuestions, isDataLoaded]);
+
+    // Save question answers when they change
+    useEffect(() => {
+        if (!isDataLoaded) return;
+        
+        CompanyStorageService.saveQuestionAnswers(questionAnswers)
+            .catch(error => console.error('Error saving question answers:', error));
+    }, [questionAnswers, isDataLoaded]);
 
     // Grant Templates
     const grantTemplates = [
@@ -104,23 +205,66 @@ const GrantApplicationForm = () => {
         }));
     };
 
-    const handleFileUpload = (files) => {
-        setCompanyInfo(prev => ({
-            ...prev,
-            documents: [...prev.documents, ...Array.from(files)]
-        }));
+    const handleFileUpload = async (files) => {
+        if (!files || files.length === 0) return;
+        
+        try {
+            setIsLoading(true);
+            
+            // Use CompanyStorageService to handle file uploads
+            const fileArray = Array.from(files);
+            const uploadPromises = fileArray.map(file => CompanyStorageService.addDocument(file));
+            
+            await Promise.all(uploadPromises);
+            
+            // Refresh company info to get updated documents list
+            const updatedCompanyInfo = await CompanyStorageService.getCompanyInfo();
+            if (updatedCompanyInfo) {
+                setCompanyInfo(updatedCompanyInfo);
+            }
+            
+            console.log(`Successfully uploaded ${files.length} file(s)`);
+        } catch (error) {
+            console.error('Error uploading files:', error);
+            alert('Error uploading files. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const removeDocument = (index) => {
-        setCompanyInfo(prev => ({
-            ...prev,
-            documents: prev.documents.filter((_, i) => i !== index)
-        }));
+    const removeDocument = async (index) => {
+        try {
+            const success = await CompanyStorageService.removeDocument(index);
+            
+            if (success) {
+                // Refresh company info to get updated documents list
+                const updatedCompanyInfo = await CompanyStorageService.getCompanyInfo();
+                if (updatedCompanyInfo) {
+                    setCompanyInfo(updatedCompanyInfo);
+                }
+                console.log('Document removed successfully');
+            } else {
+                console.error('Failed to remove document');
+            }
+        } catch (error) {
+            console.error('Error removing document:', error);
+        }
     };
 
     const submitCompanyInfo = async () => {
         setIsLoading(true);
         try {
+            // First, save all company information to AsyncStorage
+            const saveSuccess = await CompanyStorageService.saveCompanyInfo(companyInfo);
+            if (!saveSuccess) {
+                throw new Error('Failed to save company information');
+            }
+
+            // Also save current step
+            await CompanyStorageService.saveCurrentStep(2);
+            
+            console.log('Company information saved to AsyncStorage successfully');
+
             // Simulate API call to backend
             const response = await fetch('/api/validate-company-info', {
                 method: 'POST',
@@ -173,11 +317,19 @@ const GrantApplicationForm = () => {
         setIsLoading(false);
     };
 
-    const handleQuestionAnswer = (questionId, answer) => {
-        setQuestionAnswers(prev => ({
-            ...prev,
-            [questionId]: answer
-        }));
+    const handleQuestionAnswer = async (questionId, answer) => {
+        try {
+            // Update local state
+            setQuestionAnswers(prev => ({
+                ...prev,
+                [questionId]: answer
+            }));
+            
+            // Save to AsyncStorage
+            await CompanyStorageService.updateQuestionAnswer(questionId, answer);
+        } catch (error) {
+            console.error('Error saving question answer:', error);
+        }
     };
 
     const submitFollowUpAnswers = async () => {
@@ -222,16 +374,8 @@ const GrantApplicationForm = () => {
         } else if (currentStep === 3 && followUpQuestions.length > 0) {
             submitFollowUpAnswers();
         } else if (currentStep === 3 && followUpQuestions.length === 0) {
-            // Navigate to Application Editor with form data
-            navigate('/application-editor', {
-                state: {
-                    formData: {
-                        selectedTemplate,
-                        companyInfo,
-                        questionAnswers
-                    }
-                }
-            });
+            // Navigate to Application Editor - data is already saved in AsyncStorage
+            navigate('/application-editor');
         }
     }; const prevStep = () => {
         if (currentStep === 1) {
