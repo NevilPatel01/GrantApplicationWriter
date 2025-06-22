@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import CompanyStorageService from '../services/CompanyStorageService';
 import GrantGenerationService from '../services/GrantGenerationService';
-import Navigation from '../components/Navigation';
+import NavigationFixed from '../components/NavigationFixed';
 import PredictabilityModal from '../components/PredictabilityModal';
 import AIEditDialog from '../components/AIEditDialog';
 import AnalysisLoader from '../components/AnalysisLoader';
 import AIGenerationStatus from '../components/AIGenerationStatus';
+import ExportNotification from '../components/ExportNotification';
 
 const ApplicationEditor = () => {
     const navigate = useNavigate();
@@ -24,6 +23,14 @@ const ApplicationEditor = () => {
     const [formData, setFormData] = useState(null);
     const [showAnalysisLoader, setShowAnalysisLoader] = useState(false);
     const [analysisProgress, setAnalysisProgress] = useState(0);
+    
+    // Export notification states
+    const [showExportNotification, setShowExportNotification] = useState(false);
+    const [exportNotification, setExportNotification] = useState({
+        type: 'success',
+        title: 'Export Successful',
+        message: 'Your file has been exported successfully'
+    });
     
     // AI Generation states (for future use)
     const [isGeneratingWithAI] = useState(false);
@@ -186,44 +193,73 @@ const ApplicationEditor = () => {
     // Export to PDF
     const exportToPDF = async () => {
         const element = editorRef.current;
-        if (!element) return;
+        if (!element) {
+            showNotification('error', 'Export Failed', 'Unable to find content to export');
+            return;
+        }
 
         try {
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-            });
+            const result = await GrantGenerationService.saveAsFile(
+                markdownContent,
+                formData?.companyInfo?.companyName || 'GrantApplication',
+                'pdf',
+                element
+            );
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = 30;
-
-            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-            pdf.save('grant-application.pdf');
+            if (result.success) {
+                showNotification('success', 'PDF Export Successful', result.message);
+            } else {
+                showNotification('error', 'PDF Export Failed', result.message);
+            }
         } catch (error) {
             console.error('Error generating PDF:', error);
+            showNotification('error', 'PDF Export Failed', 'An error occurred while generating the PDF');
         }
         setShowExportMenu(false);
     };
 
     // Copy to clipboard
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(markdownContent);
+    const copyToClipboard = async () => {
+        try {
+            const result = await GrantGenerationService.copyToClipboard(markdownContent);
+            
+            if (result.success) {
+                showNotification('success', 'Copied to Clipboard', result.message);
+            } else {
+                showNotification('error', 'Copy Failed', result.message);
+            }
+        } catch (error) {
+            console.error('Error copying to clipboard:', error);
+            showNotification('error', 'Copy Failed', 'An error occurred while copying to clipboard');
+        }
         setShowExportMenu(false);
-        // Could add toast notification here
+    };
+
+    // Save as TXT file
+    const saveAsTXT = async () => {
+        try {
+            const result = await GrantGenerationService.saveAsFile(
+                markdownContent,
+                formData?.companyInfo?.companyName || 'GrantApplication',
+                'txt'
+            );
+
+            if (result.success) {
+                showNotification('success', 'TXT Export Successful', result.message);
+            } else {
+                showNotification('error', 'TXT Export Failed', result.message);
+            }
+        } catch (error) {
+            console.error('Error saving TXT:', error);
+            showNotification('error', 'TXT Export Failed', 'An error occurred while saving the text file');
+        }
+        setShowExportMenu(false);
+    };
+
+    // Helper function to show notifications
+    const showNotification = (type, title, message) => {
+        setExportNotification({ type, title, message });
+        setShowExportNotification(true);
     };
 
     // Navigate back to edit company information (step 2)
@@ -260,7 +296,7 @@ const ApplicationEditor = () => {
     return (
         <>
             {/* Custom Styles for Liquid Glass Animation and Inter Font */}
-            <style jsx>{`
+            <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
                 
                 * {
@@ -288,7 +324,7 @@ const ApplicationEditor = () => {
             `}</style>
             
             <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-                <Navigation 
+                <NavigationFixed 
                     navigate={navigate}
                     editCompanyInfo={editCompanyInfo}
                     predictabilityScore={predictabilityScore}
@@ -297,18 +333,16 @@ const ApplicationEditor = () => {
                     setShowExportMenu={setShowExportMenu}
                     exportToPDF={exportToPDF}
                     copyToClipboard={copyToClipboard}
-                    formData={formData}
-                    GrantGenerationService={GrantGenerationService}
-                    markdownContent={markdownContent}
+                    saveAsTXT={saveAsTXT}
                 />
 
                 {/* Main Content */}
                 <main className="pt-30 pb-12 px-6">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4 font-display">
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'}}>
                             Application Editor & Review
-                        </h1>
+                        </h2>
                         <p className="text-gray-600 text-lg max-w-2xl mx-auto font-body">
                             Review and refine your AI-generated grant application. Select any text to enhance it with AI assistance.
                         </p>
@@ -375,6 +409,15 @@ const ApplicationEditor = () => {
             <AnalysisLoader 
                 showLoader={showAnalysisLoader}
                 analysisProgress={analysisProgress}
+            />
+
+            {/* Export Notification */}
+            <ExportNotification
+                isVisible={showExportNotification}
+                onClose={() => setShowExportNotification(false)}
+                type={exportNotification.type}
+                title={exportNotification.title}
+                message={exportNotification.message}
             />
             </div>
         </>

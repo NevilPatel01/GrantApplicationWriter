@@ -100,27 +100,122 @@ class GrantGenerationService {
      * @param {string} content - Generated grant application content
      * @param {string} companyName - Company name for filename
      * @param {string} format - File format ('txt' or 'pdf')
+     * @param {Element} elementForPdf - DOM element to convert to PDF (required for PDF format)
+     * @returns {Promise<{success: boolean, message: string, filename?: string}>}
      */
-    saveAsFile(content, companyName, format = 'txt') {
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-        const filename = `grant_application_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.${format}`;
+    async saveAsFile(content, companyName, format = 'txt', elementForPdf = null) {
+        try {
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+            const filename = `grant_application_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.${format}`;
 
-        if (format === 'txt') {
-            // Create and download text file
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        } else if (format === 'pdf') {
-            // For PDF, we would need additional libraries or send to backend
-            console.log('PDF export would be implemented here');
-            alert('PDF export feature coming soon! Use TXT format for now.');
+            if (format === 'txt') {
+                // Create and download text file
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                return {
+                    success: true,
+                    message: 'Text file downloaded successfully!',
+                    filename: filename
+                };
+
+            } else if (format === 'pdf') {
+                if (!elementForPdf) {
+                    throw new Error('DOM element required for PDF generation');
+                }
+
+                // Import jsPDF and html2canvas dynamically
+                const jsPDF = (await import('jspdf')).default;
+                const html2canvas = (await import('html2canvas')).default;
+
+                // Generate canvas from DOM element
+                const canvas = await html2canvas(elementForPdf, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    height: elementForPdf.scrollHeight,
+                    width: elementForPdf.scrollWidth
+                });
+
+                // Create PDF
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = 30;
+
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.save(filename);
+
+                return {
+                    success: true,
+                    message: 'PDF downloaded successfully!',
+                    filename: filename
+                };
+            }
+
+            throw new Error(`Unsupported format: ${format}`);
+
+        } catch (error) {
+            console.error('Error saving file:', error);
+            return {
+                success: false,
+                message: `Failed to save ${format.toUpperCase()} file: ${error.message}`
+            };
+        }
+    }
+
+    /**
+     * Copy content to clipboard
+     * @param {string} content - Content to copy
+     * @returns {Promise<{success: boolean, message: string}>}
+     */
+    async copyToClipboard(content) {
+        try {
+            if (!navigator.clipboard) {
+                // Fallback for browsers that don't support navigator.clipboard
+                const textArea = document.createElement('textarea');
+                textArea.value = content;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            } else {
+                await navigator.clipboard.writeText(content);
+            }
+
+            return {
+                success: true,
+                message: 'Content copied to clipboard successfully!'
+            };
+        } catch (error) {
+            console.error('Error copying to clipboard:', error);
+            return {
+                success: false,
+                message: 'Failed to copy to clipboard. Please try again.'
+            };
         }
     }
 

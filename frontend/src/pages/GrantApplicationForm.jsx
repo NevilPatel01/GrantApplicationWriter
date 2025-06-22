@@ -275,28 +275,61 @@ const GrantApplicationForm = () => {
             
             console.log('Company information saved to AsyncStorage successfully');
 
-            // Simulate API call to backend
-            const response = await fetch('/api/validate-company-info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    templateId: selectedTemplate.id,
-                    companyInfo: companyInfo
-                })
-            });
-            const data = await response.json();
-            
-            if (data.success && (!data.questions || data.questions.length === 0)) {
-                // No questions - proceed to next step
-                setCanProceed(true);
-                setFollowUpQuestions([]);
-                setCurrentStep(3);
-            } else if (data.questions && data.questions.length > 0) {
-                // Questions from API - show them
-                setFollowUpQuestions(data.questions);
-                setCanProceed(false);
-                setCurrentStep(3);
+            // Try API call to backend, but handle gracefully if not available
+            try {
+                const response = await fetch('/api/validate-company-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        templateId: selectedTemplate.id,
+                        companyInfo: companyInfo
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && (!data.questions || data.questions.length === 0)) {
+                        // No questions - proceed to next step
+                        setCanProceed(true);
+                        setFollowUpQuestions([]);
+                        setCurrentStep(3);
+                        return;
+                    } else if (data.questions && data.questions.length > 0) {
+                        // Questions from API - show them
+                        setFollowUpQuestions(data.questions);
+                        setCanProceed(false);
+                        setCurrentStep(3);
+                        return;
+                    }
+                }
+            } catch (apiError) {
+                console.log('Backend API not available, using fallback questions:', apiError.message);
             }
+
+            // Fallback: Generate some demo follow-up questions
+            setFollowUpQuestions([
+                {
+                    id: 1,
+                    question: "What is your primary business objective for this grant?",
+                    type: "textarea",
+                    required: true
+                },
+                {
+                    id: 2,
+                    question: "How will this grant help you achieve your business goals?",
+                    type: "textarea",
+                    required: true
+                },
+                {
+                    id: 3,
+                    question: "What specific outcomes do you expect from this project?",
+                    type: "textarea",
+                    required: true
+                }
+            ]);
+            setCanProceed(false);
+            setCurrentStep(3);
         } catch (error) {
             console.error('Error submitting company info:', error);
             // For demo purposes, simulate some follow-up questions
@@ -345,29 +378,44 @@ const GrantApplicationForm = () => {
     const submitFollowUpAnswers = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/api/submit-followup-answers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    templateId: selectedTemplate.id,
-                    companyInfo: companyInfo,
-                    answers: questionAnswers
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success && (!data.questions || data.questions.length === 0)) {
-                // Success - navigate directly to application editor
-                setCanProceed(true);
-                setFollowUpQuestions([]);
-                // Automatically navigate to application editor instead of showing "All Set" screen
-                navigate('/application-editor');
-            } else if (data.questions && data.questions.length > 0) {
-                // More questions - update the list
-                setFollowUpQuestions(data.questions);
-                setCanProceed(false);
+            // Try API call to backend, but handle gracefully if not available
+            try {
+                const response = await fetch('/api/submit-followup-answers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        templateId: selectedTemplate.id,
+                        companyInfo: companyInfo,
+                        answers: questionAnswers
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && (!data.questions || data.questions.length === 0)) {
+                        // Success - navigate directly to application editor
+                        setCanProceed(true);
+                        setFollowUpQuestions([]);
+                        navigate('/application-editor');
+                        setIsLoading(false);
+                        return;
+                    } else if (data.questions && data.questions.length > 0) {
+                        // More questions - update the list
+                        setFollowUpQuestions(data.questions);
+                        setCanProceed(false);
+                        setIsLoading(false);
+                        return;
+                    }
+                }
+            } catch (apiError) {
+                console.log('Backend API not available, proceeding with demo flow:', apiError.message);
             }
+
+            // Fallback: Assume success and navigate to application editor
+            setCanProceed(true);
+            setFollowUpQuestions([]);
+            navigate('/application-editor');
         } catch (error) {
             console.error('Error submitting answers:', error);
             // For demo, assume success after answers and navigate directly

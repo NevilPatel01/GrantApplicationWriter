@@ -9,6 +9,21 @@ const Navigation = ({
     setShowExportMenu, 
     exportToPDF, 
     copyToClipboard,
+    saveAsTXT,
+    formData, 
+    GrantGenerationService, 
+    markdownContent 
+}) => {
+
+const Navigation = ({ 
+    navigate, 
+    editCompanyInfo, 
+    predictabilityScore, 
+    setShowPredictabilityModal, 
+    showExportMenu, 
+    setShowExportMenu, 
+    exportToPDF, 
+    copyToClipboard,
     formData,
     GrantGenerationService,
     markdownContent 
@@ -75,14 +90,7 @@ const Navigation = ({
                                 <span className='text-black'>Export as PDF</span>
                             </button>
                             <button 
-                                onClick={() => {
-                                    GrantGenerationService.saveAsFile(
-                                        markdownContent,
-                                        formData?.companyInfo?.companyName || 'GrantApplication',
-                                        'txt'
-                                    );
-                                    setShowExportMenu(false);
-                                }}
+                                onClick={saveAsTXT}
                                 className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors text-gray-700 hover:text-gray-900 font-body flex items-center space-x-2"
                             >
                                 <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">

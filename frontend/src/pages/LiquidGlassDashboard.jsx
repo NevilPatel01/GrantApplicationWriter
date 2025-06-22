@@ -291,7 +291,7 @@ const LiquidGlassDashboard = () => {
                                 <div className="flex flex-col space-y-3">
                                     <div className="flex items-center space-x-2 text-sm text-gray-400">
                                         <span className="text-lg leading-none">📍</span>
-                                        <span className="leading-snug">San Francisco, CA</span>
+                                        <span className="leading-snug">Waterloo, CANADA</span>
                                     </div>
                                     <div className="flex items-center space-x-2 text-sm text-gray-400">
                                         <span className="text-lg leading-none">📞</span>
@@ -299,7 +299,7 @@ const LiquidGlassDashboard = () => {
                                     </div>
                                     <div className="flex items-center space-x-2 text-sm text-gray-400">
                                         <span className="text-lg leading-none">✉️</span>
-                                        <span className="leading-snug">hello@lazygrant.com</span>
+                                        <span className="leading-snug">hello@lazygrant.co</span>
                                     </div>
                                 </div>
                             </div>
