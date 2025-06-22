@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const GrantApplicationForm = () => {
@@ -7,12 +7,8 @@ const GrantApplicationForm = () => {
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [companyInfo, setCompanyInfo] = useState({
         companyName: '',
-        industry: '',
         employeeCount: '',
         annualRevenue: '',
-        website: '',
-        address: '',
-        phone: '',
         email: '',
         description: '',
         documents: []
@@ -21,6 +17,7 @@ const GrantApplicationForm = () => {
     const [questionAnswers, setQuestionAnswers] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [canProceed, setCanProceed] = useState(false);
+    const [showValidationDialog, setShowValidationDialog] = useState(false);
 
     // Grant Templates
     const grantTemplates = [
@@ -219,11 +216,22 @@ const GrantApplicationForm = () => {
     const nextStep = () => {
         if (currentStep === 1 && selectedTemplate) {
             setCurrentStep(2);
-            setCanProceed(false);
+            // canProceed will be automatically managed by useEffect
         } else if (currentStep === 2) {
             submitCompanyInfo();
         } else if (currentStep === 3 && followUpQuestions.length > 0) {
             submitFollowUpAnswers();
+        } else if (currentStep === 3 && followUpQuestions.length === 0) {
+            // Navigate to Application Editor with form data
+            navigate('/application-editor', {
+                state: {
+                    formData: {
+                        selectedTemplate,
+                        companyInfo,
+                        questionAnswers
+                    }
+                }
+            });
         }
     }; const prevStep = () => {
         if (currentStep === 1) {
@@ -244,9 +252,40 @@ const GrantApplicationForm = () => {
         }
     };
 
+    const getInputClassName = (fieldName, isRequired = false) => {
+        const baseClass = "glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none transition-all duration-300";
+        
+        if (!isRequired) return baseClass;
+        
+        const value = companyInfo[fieldName]?.trim() || '';
+        const isEmpty = !value;
+        
+        let isInvalid = false;
+        
+        // Field-specific validation
+        if (fieldName === 'email' && value) {
+            isInvalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+        
+        if (isEmpty || isInvalid) {
+            return `${baseClass} border-2 border-red-500/50 focus:border-red-400`;
+        } else if (value) {
+            return `${baseClass} border-2 border-green-500/50 focus:border-green-400`;
+        }
+        
+        return baseClass;
+    };
+
     const isCompanyInfoComplete = () => {
-        const required = ['companyName', 'industry', 'email', 'description'];
-        return required.every(field => companyInfo[field].trim() !== '');
+        // Required fields
+        const required = ['companyName', 'email', 'description'];
+        const hasAllRequired = required.every(field => companyInfo[field]?.trim());
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const hasValidEmail = emailRegex.test(companyInfo.email?.trim() || '');
+        
+        return hasAllRequired && hasValidEmail;
     };
 
     const areQuestionsAnswered = () => {
@@ -255,8 +294,80 @@ const GrantApplicationForm = () => {
         );
     };
 
+    // Get validation issues for Step 2 (Company Info)
+    const getCompanyInfoValidationIssues = () => {
+        const issues = [];
+        
+        // Required fields
+        if (!companyInfo.companyName?.trim()) issues.push('Company Name');
+        if (!companyInfo.email?.trim()) issues.push('Email Address');
+        if (!companyInfo.description?.trim()) issues.push('Company Description');
+        
+        // Email validation
+        if (companyInfo.email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyInfo.email)) {
+            issues.push('Valid Email Address');
+        }
+        
+        return issues;
+    };
+
+    // Get validation issues for Step 3 (Follow-up Questions)
+    const getQuestionValidationIssues = () => {
+        return followUpQuestions
+            .filter(q => q.required && !questionAnswers[q.id]?.trim())
+            .map(q => q.question);
+    };
+
+    // Validation Dialog Component
+    const ValidationDialog = ({ isVisible, issues, title }) => {
+        if (!isVisible || issues.length === 0) return null;
+
+        return (
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+                <div className="glass-card p-4 rounded-lg border-l-4 border-orange-500 min-w-72 max-w-96">
+                    <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-orange-400">⚠️</span>
+                        <p className="text-gray-300 font-body text-sm font-medium">
+                            {title}
+                        </p>
+                    </div>
+                    <ul className="space-y-1 text-sm text-gray-400 font-body">
+                        {issues.map((issue, index) => (
+                            <li key={index}>• {issue}</li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        );
+    };
+
+    // Auto-update canProceed when companyInfo changes for step 2, or when answers change for step 3
+    useEffect(() => {
+        if (currentStep === 2) {
+            const checkCompletion = () => {
+                // Required fields
+                const required = ['companyName', 'email', 'description'];
+                const hasAllRequired = required.every(field => companyInfo[field]?.trim());
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const hasValidEmail = emailRegex.test(companyInfo.email?.trim() || '');
+                
+                return hasAllRequired && hasValidEmail;
+            };
+            
+            setCanProceed(checkCompletion());
+        } else if (currentStep === 3) {
+            // For step 3, check if all required questions are answered
+            const allRequiredAnswered = followUpQuestions.every(q => 
+                q.required ? questionAnswers[q.id]?.trim() : true
+            );
+            setCanProceed(allRequiredAnswered || followUpQuestions.length === 0);
+        }
+    }, [companyInfo, currentStep, questionAnswers, followUpQuestions]);
+
     return (
-        <div className="min-h-screen w-full relative overflow-hidden">
+        <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 relative overflow-hidden">
             {/* Animated Background */}
             <div className="liquid-glass-bg fixed inset-0 pointer-events-none"></div>
             
@@ -372,121 +483,69 @@ const GrantApplicationForm = () => {
                             <div className="glass-card p-8 rounded-2xl max-w-4xl mx-auto">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Company Details */}
-                                    <div className="space-y-6">
-                                        <h3 className="text-2xl font-bold text-white mb-4 font-heading">Company Details</h3>
+                                    <div className="space-y-6 md:col-span-2">
                                         
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Company Name *</label>
-                                            <input
-                                                type="text"
-                                                value={companyInfo.companyName}
-                                                onChange={(e) => handleCompanyInfoChange('companyName', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
-                                                placeholder="Enter your company name"
-                                            />
+                                        {/* First Row: Company Name and Email side by side */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Company Name *</label>
+                                                <input
+                                                    type="text"
+                                                    value={companyInfo.companyName}
+                                                    onChange={(e) => handleCompanyInfoChange('companyName', e.target.value)}
+                                                    className={getInputClassName('companyName', true)}
+                                                    placeholder="Enter your company name"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Email *</label>
+                                                <input
+                                                    type="email"
+                                                    value={companyInfo.email}
+                                                    onChange={(e) => handleCompanyInfoChange('email', e.target.value)}
+                                                    className={getInputClassName('email', true)}
+                                                    placeholder="company@example.com"
+                                                />
+                                            </div>
                                         </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Industry *</label>
-                                            <select
-                                                value={companyInfo.industry}
-                                                onChange={(e) => handleCompanyInfoChange('industry', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                                            >
-                                                <option value="">Select your industry</option>
-                                                <option value="technology">Technology</option>
-                                                <option value="healthcare">Healthcare</option>
-                                                <option value="education">Education</option>
-                                                <option value="environment">Environment</option>
-                                                <option value="research">Research</option>
-                                                <option value="other">Other</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Employee Count</label>
-                                            <select
-                                                value={companyInfo.employeeCount}
-                                                onChange={(e) => handleCompanyInfoChange('employeeCount', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                                            >
-                                                <option value="">Select employee count</option>
-                                                <option value="1-10">1-10 employees</option>
-                                                <option value="11-50">11-50 employees</option>
-                                                <option value="51-200">51-200 employees</option>
-                                                <option value="201-1000">201-1000 employees</option>
-                                                <option value="1000+">1000+ employees</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Annual Revenue</label>
-                                            <input
-                                                type="text"
-                                                value={companyInfo.annualRevenue}
-                                                onChange={(e) => handleCompanyInfoChange('annualRevenue', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
-                                                placeholder="e.g. $1,000,000"
-                                            />
+                                        
+                                        {/* Second Row: Employee Count and Grant Amount side by side */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Employee Count</label>
+                                                <select
+                                                    value={companyInfo.employeeCount}
+                                                    onChange={(e) => handleCompanyInfoChange('employeeCount', e.target.value)}
+                                                    className="glass-input w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+                                                >
+                                                    <option value="">Select employee count</option>
+                                                    <option value="1-10">1-10 employees</option>
+                                                    <option value="11-50">11-50 employees</option>
+                                                    <option value="51-200">51-200 employees</option>
+                                                    <option value="201-1000">201-1000 employees</option>
+                                                    <option value="1000+">1000+ employees</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Grant Amount</label>
+                                                <input
+                                                    type="text"
+                                                    value={companyInfo.annualRevenue}
+                                                    onChange={(e) => handleCompanyInfoChange('annualRevenue', e.target.value)}
+                                                    className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
+                                                    placeholder="e.g. $1,000,000"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-
-                                    {/* Contact & Additional Info */}
-                                    <div className="space-y-6">
-                                        <h3 className="text-2xl font-bold text-white mb-4 font-heading">Contact Information</h3>
-                                        
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Email *</label>
-                                            <input
-                                                type="email"
-                                                value={companyInfo.email}
-                                                onChange={(e) => handleCompanyInfoChange('email', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
-                                                placeholder="company@example.com"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Website</label>
-                                            <input
-                                                type="url"
-                                                value={companyInfo.website}
-                                                onChange={(e) => handleCompanyInfoChange('website', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
-                                                placeholder="https://example.com"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Phone</label>
-                                            <input
-                                                type="tel"
-                                                value={companyInfo.phone}
-                                                onChange={(e) => handleCompanyInfoChange('phone', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none"
-                                                placeholder="+1 (555) 123-4567"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Address</label>
-                                            <textarea
-                                                value={companyInfo.address}
-                                                onChange={(e) => handleCompanyInfoChange('address', e.target.value)}
-                                                className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none resize-none"
-                                                rows="3"
-                                                placeholder="Enter your company address"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Company Description - Full Width */}
                                     <div className="md:col-span-2">
                                         <label className="block text-gray-300 text-sm font-medium mb-2 font-body">Company Description *</label>
                                         <textarea
                                             value={companyInfo.description}
                                             onChange={(e) => handleCompanyInfoChange('description', e.target.value)}
-                                            className="glass-input w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none resize-none"
+                                            className={getInputClassName('description', true)}
                                             rows="4"
                                             placeholder="Describe your company, mission, and the project you're seeking funding for..."
                                         />
@@ -601,45 +660,76 @@ const GrantApplicationForm = () => {
                                 </span>
                             </button>
 
-                            <button
-                                onClick={(e) => {
-                                    createRipple(e);
-                                    nextStep();
-                                }}
-                                disabled={
-                                    !canProceed || 
-                                    isLoading ||
-                                    (currentStep === 1 && !selectedTemplate) ||
-                                    (currentStep === 2 && !isCompanyInfoComplete()) ||
-                                    (currentStep === 3 && followUpQuestions.length > 0 && !areQuestionsAnswered())
-                                }
-                                className={`glass-button ripple-effect px-8 py-3 rounded-xl font-medium transition-all duration-300 font-body ${
-                                    (!canProceed || 
-                                     isLoading ||
-                                     (currentStep === 1 && !selectedTemplate) ||
-                                     (currentStep === 2 && !isCompanyInfoComplete()) ||
-                                     (currentStep === 3 && followUpQuestions.length > 0 && !areQuestionsAnswered())
-                                    )
-                                        ? 'opacity-50 cursor-not-allowed' 
-                                        : 'text-white hover:scale-105'
-                                }`}
-                            >
-                                <span className="flex items-center space-x-2">
-                                    {isLoading ? (
-                                        <>
-                                            <span className="animate-spin">⟳</span>
-                                            <span>Processing...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>
-                                                {currentStep === 3 && followUpQuestions.length === 0 ? 'Submit Application' : 'Next'}
-                                            </span>
-                                            <span>→</span>
-                                        </>
-                                    )}
-                                </span>
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={(e) => {
+                                        createRipple(e);
+                                        nextStep();
+                                    }}
+                                    onMouseEnter={() => {
+                                        const isDisabled = !canProceed || 
+                                            isLoading ||
+                                            (currentStep === 1 && !selectedTemplate) ||
+                                            (currentStep === 2 && !isCompanyInfoComplete()) ||
+                                            (currentStep === 3 && followUpQuestions.length > 0 && !areQuestionsAnswered());
+                                        
+                                        if (isDisabled) {
+                                            setShowValidationDialog(true);
+                                        }
+                                    }}
+                                    onMouseLeave={() => setShowValidationDialog(false)}
+                                    disabled={
+                                        !canProceed || 
+                                        isLoading ||
+                                        (currentStep === 1 && !selectedTemplate) ||
+                                        (currentStep === 2 && !isCompanyInfoComplete()) ||
+                                        (currentStep === 3 && followUpQuestions.length > 0 && !areQuestionsAnswered())
+                                    }
+                                    className={`glass-button ripple-effect px-8 py-3 rounded-xl font-medium transition-all duration-300 font-body ${
+                                        (!canProceed || 
+                                         isLoading ||
+                                         (currentStep === 1 && !selectedTemplate) ||
+                                         (currentStep === 2 && !isCompanyInfoComplete()) ||
+                                         (currentStep === 3 && followUpQuestions.length > 0 && !areQuestionsAnswered())
+                                        )
+                                            ? 'opacity-50 cursor-not-allowed' 
+                                            : 'text-white hover:scale-105'
+                                    }`}
+                                >
+                                    <span className="flex items-center space-x-2">
+                                        {isLoading ? (
+                                            <>
+                                                <span className="animate-spin">⟳</span>
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>
+                                                    {currentStep === 3 && followUpQuestions.length === 0 ? 'Review Application' : 'Next'}
+                                                </span>
+                                                <span>→</span>
+                                            </>
+                                        )}
+                                    </span>
+                                </button>
+
+                                {/* Validation Dialog */}
+                                {currentStep === 2 && (
+                                    <ValidationDialog
+                                        isVisible={showValidationDialog && !isCompanyInfoComplete()}
+                                        issues={getCompanyInfoValidationIssues()}
+                                        title="Please complete all required fields and fix any validation errors to continue:"
+                                    />
+                                )}
+                                
+                                {currentStep === 3 && followUpQuestions.length > 0 && (
+                                    <ValidationDialog
+                                        isVisible={showValidationDialog && !areQuestionsAnswered()}
+                                        issues={getQuestionValidationIssues()}
+                                        title="Please answer all required questions to continue:"
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </main>
