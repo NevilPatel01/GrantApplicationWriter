@@ -316,10 +316,7 @@ export default function Dashboard() {
                                 <h1 className="text-3xl font-bold text-gradient">
                                     LazyGrant
                                 </h1>
-                                <div className="hidden sm:block w-px h-8 bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
-                                <span className="hidden sm:inline text-gray-400 text-sm font-mono glass-effect px-3 py-1 rounded-lg">
-                                    Dashboard
-                                </span>
+                                
                             </div>
 
                             <div className="flex items-center gap-4 animate-slide-in-right">

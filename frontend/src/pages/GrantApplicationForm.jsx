@@ -367,14 +367,12 @@ const GrantApplicationForm = () => {
     }, [companyInfo, currentStep, questionAnswers, followUpQuestions]);
 
     return (
-        <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="liquid-glass-bg fixed inset-0 pointer-events-none"></div>
+        <div className="min-h-screen w-full bg-gradient-to-br relative overflow-hidden">
             
             {/* Main Content */}
             <div className="liquid-glass-overlay relative z-10 w-full">
                 {/* Header Navigation */}
-                <header className="glass-nav sticky top-0 z-50 p-6">
+                <header className="sticky top-0 z-50 p-5 bg-transparent">
                     <div className="w-full flex items-center justify-between">
                         <div
                             className="flex items-center space-x-4 cursor-pointer"
