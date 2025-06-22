@@ -1,5 +1,4 @@
 import React from 'react';
-
 const Navigation = ({ 
     navigate, 
     editCompanyInfo, 
@@ -9,24 +8,7 @@ const Navigation = ({
     setShowExportMenu, 
     exportToPDF, 
     copyToClipboard,
-    saveAsTXT,
-    formData, 
-    GrantGenerationService, 
-    markdownContent 
-}) => {
-
-const Navigation = ({ 
-    navigate, 
-    editCompanyInfo, 
-    predictabilityScore, 
-    setShowPredictabilityModal, 
-    showExportMenu, 
-    setShowExportMenu, 
-    exportToPDF, 
-    copyToClipboard,
-    formData,
-    GrantGenerationService,
-    markdownContent 
+    saveAsTXT
 }) => {
     return (
         <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
