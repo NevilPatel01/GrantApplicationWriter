@@ -8,9 +8,9 @@ const LiquidGlassDashboard = () => {
 
     // Mock data for demonstration
     const stats = [
-        { label: 'Total Applications', value: '12', icon: '📊', change: '+3 this month' },
-        { label: 'In Progress', value: '5', icon: '⏳', change: '2 drafts' },
-        { label: 'Submitted', value: '4', icon: '✅', change: 'Awaiting review' },
+        { label: 'Total Applications', value: '3', icon: '📊', change: '+3 this month' },
+        { label: 'In Progress', value: '1', icon: '⏳', change: '2 drafts' },
+        { label: 'Submitted', value: '1', icon: '✅', change: 'Awaiting review' },
         { label: 'Success Rate', value: '75%', icon: '🎯', change: '+5% this quarter' }
     ];
 

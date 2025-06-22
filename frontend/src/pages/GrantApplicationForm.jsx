@@ -120,6 +120,16 @@ const GrantApplicationForm = () => {
             .catch(error => console.error('Error saving question answers:', error));
     }, [questionAnswers, isDataLoaded]);
 
+    // Auto-navigate when step 3 is completed (no more questions)
+    useEffect(() => {
+        if (currentStep === 3 && followUpQuestions.length === 0 && isDataLoaded && !isLoading) {
+            // Small delay to ensure state is properly updated
+            setTimeout(() => {
+                navigate('/application-editor');
+            }, 100);
+        }
+    }, [currentStep, followUpQuestions.length, isDataLoaded, isLoading, navigate]);
+
     // Grant Templates
     const grantTemplates = [
     {
@@ -348,9 +358,11 @@ const GrantApplicationForm = () => {
             const data = await response.json();
             
             if (data.success && (!data.questions || data.questions.length === 0)) {
-                // Success - enable next button
+                // Success - navigate directly to application editor
                 setCanProceed(true);
                 setFollowUpQuestions([]);
+                // Automatically navigate to application editor instead of showing "All Set" screen
+                navigate('/application-editor');
             } else if (data.questions && data.questions.length > 0) {
                 // More questions - update the list
                 setFollowUpQuestions(data.questions);
@@ -358,9 +370,10 @@ const GrantApplicationForm = () => {
             }
         } catch (error) {
             console.error('Error submitting answers:', error);
-            // For demo, assume success after answers
+            // For demo, assume success after answers and navigate directly
             setCanProceed(true);
             setFollowUpQuestions([]);
+            navigate('/application-editor');
         }
         setIsLoading(false);
     };
