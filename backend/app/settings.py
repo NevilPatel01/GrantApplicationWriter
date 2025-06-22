@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     env_name: str
     db_url: str
 
+    # llm key
+    gemini_api_key: str
+
     # JWT Settings
     secret_key: str
     algorithm: str

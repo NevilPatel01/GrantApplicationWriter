@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.v1 import organization
+from app.api.routes.v1 import organization, gen_ai
+from app.deps.gemini_service import GeminiService
 from app.settings import get_settings
 from app.utils import DbDependency
 from app.api.routes import auth
@@ -10,6 +11,7 @@ from app.api.routes.auth import CurrentUser
 app = FastAPI()
 app.include_router(auth.router)
 app.include_router(organization.router)
+app.include_router(gen_ai.router)
 
 
 settings = get_settings()
